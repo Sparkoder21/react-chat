@@ -29,10 +29,18 @@ function updateData(data){
 	const array = [];
 
 	Object.entries(data).forEach((value) => {
-		array.push(value[1]);
-	});	
+		array.push({
+			id: value[0],
+			...value[1]
+		});
+	});
 	array.sort((object1, object2) => object1.timestamp - object2.timestamp);
 
+	if (array.length >= 50){
+		const lastChat = array.reduce((object1, object2) => object1.timestamp < object2.timestamp ? object1 : object2);
+
+		set(ref(database, `reactChat/${lastChat.id}`), null);
+	}
 	setChats(array);
 }
 
