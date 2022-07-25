@@ -15,7 +15,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-let setChats;
+let sendable = true, sended = 0;
+
+let setChats, sendTime;
 
 onValue(ref(database, "reactChat"), (snapshot) => {
 	updateData(snapshot.val());
@@ -45,11 +47,30 @@ function updateData(data){
 }
 
 function sendData(newUser, newMessage){
-	set(ref(database, `reactChat/${uuid()}`), {
-		name: newUser,
-		message: newMessage,
-		timestamp: serverTimestamp()
-	});
+	if (sendable){
+		set(ref(database, `reactChat/${uuid()}`), {
+			name: newUser.substring(0, 15),
+			message: newMessage.substring(0, 150),
+			timestamp: serverTimestamp()
+		});
+
+		if (sended >= 3){
+			alert("You have been put in timeout. Please wait for 15 seconds before sending another message.");
+
+			sendable = false;
+
+			setTimeout(() => {
+				sendable = true;
+			}, 15000);
+		}
+		++sended;
+	
+		sendTime = setTimeout(() => {
+			sended = 0;
+
+			return sendTime;
+		}, 5000);
+	}
 }
 
 export {setData, sendData};
